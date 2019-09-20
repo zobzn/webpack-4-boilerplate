@@ -1,7 +1,7 @@
-const common = require("./common");
-const $ = require("jquery");
+import common from "./common";
+import $ from "jquery";
 
-require("./second.scss");
+import "./second.scss";
 
 common(2);
 

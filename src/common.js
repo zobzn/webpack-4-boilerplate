@@ -1,3 +1,3 @@
-module.export = (...args) => {
+export default (...args) => {
   console.log(...args);
 };
