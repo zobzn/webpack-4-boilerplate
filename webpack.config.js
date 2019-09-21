@@ -4,36 +4,126 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ManifestPlugin = require("webpack-manifest-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const WebpackAssetsManifest = require("webpack-assets-manifest");
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
+const { HashedModuleIdsPlugin } = webpack;
+const FriendlyErrorsWebpackPlugin = require("friendly-errors-webpack-plugin");
+const WriteFilePlugin = require("write-file-webpack-plugin");
 
-const devMode = process.env.NODE_ENV !== "production";
+// const devMode = process.env.NODE_ENV !== "production";
 
 module.exports = function(env, argv) {
-  console.log(env, argv);
+  const mode = argv.mode || undefined;
+  const isProd = mode === "production";
+  const isDev = mode === "development";
+  const isWatch = !!argv.watch;
+  const isHot = !!argv.hot;
+
+  // '/' or './' or '//cdn.example.org/' or whatever
+  const publicPath = isHot ? "http://localhost:8080/" : undefined;
+
+  console.log("mode", mode);
+  console.log("watch", isWatch);
+  console.log("hot", isHot);
+
+  const plugins = [
+    new FriendlyErrorsWebpackPlugin(),
+    new CleanWebpackPlugin(),
+    new WriteFilePlugin(),
+    new ManifestPlugin({
+      fileName: "manifest.json"
+    }),
+    new WebpackAssetsManifest({
+      entrypoints: true,
+      output: "assets-manifest.json",
+      publicPath: true, // "/", "//cdn.example.org/"
+      transform: (assets, manifest) => {
+        const { name, version } = require("./package.json");
+
+        return {
+          package: { name, version },
+          entries: assets.entrypoints
+        };
+      }
+    }),
+    new HtmlWebpackPlugin({
+      // inject: "body"
+      xhtml: true,
+      title: "Документ 1",
+      template: path.resolve(__dirname, "src/index-1.htm"),
+      filename: "index-1.htm"
+      // chunks: ["vendors", "entry-js-1"]
+    }),
+    new HtmlWebpackPlugin({
+      // inject: "body"
+      xhtml: true,
+      title: "Документ 2",
+      template: path.resolve(__dirname, "src/index-2.htm"),
+      filename: "index-2.htm"
+      // chunks: ["vendors", "entry-js-2"]
+    }),
+    new MiniCssExtractPlugin({
+      filename: "assets/[chunkhash].css",
+      chunkFilename: "assets/[chunkhash].css"
+    }),
+    new HashedModuleIdsPlugin()
+  ];
+
+  if (isProd) {
+    plugins.push(
+      new BundleAnalyzerPlugin({
+        reportFilename: "bundle.html",
+        analyzerMode: "static",
+        openAnalyzer: false
+      })
+    );
+  }
 
   return {
-    watch: !!devMode,
+    context: path.resolve(__dirname, "src"),
+    node: {
+      __filename: true,
+      __dirname: true
+    },
+    watch: isWatch,
     watchOptions: {
       ignored: /node_modules/
     },
     devServer: {
-      contentBase: path.join(__dirname, "dist"),
+      contentBase: path.resolve(__dirname, "dist"),
       compress: true,
       // port: 9000,
       watchContentBase: true,
-      progress: true
+      progress: false
       // hot: true
     },
     entry: {
-      first: ["./src/first.js"],
-      second: ["./src/second.js"]
+      "entry-js-1": "./assets/entry-js-1.js",
+      "entry-js-2": "./assets/entry-js-2.js"
     },
     output: {
-      // filename: "[name].[chunkhash:8].min.js",
-      filename: "[name].[chunkhash].min.js",
+      publicPath,
+      filename: isHot ? "assets/[name].js" : "assets/[chunkhash].js",
+      chunkFilename: isHot
+        ? "assets/deps/[name].js"
+        : "assets/deps/[chunkhash].js",
       path: path.resolve(__dirname, "dist")
     },
     module: {
       rules: [
+        {
+          test: /\.html$/,
+          use: [
+            {
+              loader: "file-loader",
+              options: {
+                name: "[name].[ext]"
+              }
+            },
+            "extract-loader",
+            "html-loader"
+          ]
+        },
         {
           test: /\.m?jsx?$/,
           exclude: /(node_modules|bower_components)/,
@@ -44,13 +134,17 @@ module.exports = function(env, argv) {
         {
           test: /\.(sa|sc|c)ss$/,
           use: [
-            {
-              loader: MiniCssExtractPlugin.loader,
-              options: {
-                hmr: !!devMode
-              }
-            },
-            // "style-loader",
+            false
+              ? "style-loader"
+              : {
+                  loader: MiniCssExtractPlugin.loader,
+                  options: {
+                    // only enable hot in development
+                    hmr: isHot,
+                    // if hmr does not work, this is a forceful method.
+                    reloadAll: true
+                  }
+                },
             "css-loader",
             "postcss-loader",
             "sass-loader"
@@ -68,54 +162,28 @@ module.exports = function(env, argv) {
         }
       ]
     },
+    performance: {
+      hints: false
+    },
     optimization: {
       // runtimeChunk: true,
       splitChunks: {
         cacheGroups: {
-          vendor: {
-            test: /node_modules/, // you may add "vendor.js" here if you want to
-            name: "vendors",
-            chunks: "initial",
-            enforce: true
+          commons: {
+            test: /[\\/]node_modules[\\/]/,
+            // name: "vendors",
+            chunks: "all",
+            name: false
           }
+          // vendor: {
+          //   test: /node_modules/,
+          //   name: "vendors",
+          //   chunks: "initial",
+          //   enforce: true
+          // }
         }
       }
     },
-    plugins: [
-      // new ManifestPlugin(),
-      new WebpackAssetsManifest({
-        entrypoints: true
-        // if you need entrypoints only
-        // transform: assets => assets.entrypoints
-      }),
-      new HtmlWebpackPlugin({
-        // inject: "body"
-        template: __dirname + `/src/first.htm`,
-        filename: "first.htm",
-        chunks: ["vendors", "first"],
-        title: "Документ 1"
-      }),
-      new HtmlWebpackPlugin({
-        // inject: "body"
-        template: __dirname + `/src/second.htm`,
-        filename: "second.htm",
-        chunks: ["vendors", "second"],
-        title: "Документ 2"
-      }),
-      new MiniCssExtractPlugin({
-        filename: false && devMode ? "[name].css" : "[name].[hash].css",
-        chunkFilename: false && devMode ? "[id].css" : "[id].[hash].css"
-        // ignoreOrder: false // Enable to remove warnings about conflicting order
-      }),
-      new webpack.HashedModuleIdsPlugin({
-        // hashFunction: "sha256",
-        // hashDigest: "hex",
-        // hashDigestLength: 20
-        // ------
-        // hashFunction: "md4",
-        // hashDigest: "base64",
-        // hashDigestLength: 4
-      })
-    ]
+    plugins
   };
 };

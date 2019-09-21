@@ -2,8 +2,9 @@
   color: gray;
 }
 
-.div-1 {
-  p {
+:root {
+  .div-1 {
     color: red;
+    border: 1px solid green;
   }
 }
