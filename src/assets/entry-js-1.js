@@ -1,8 +1,7 @@
-import "./first.scss";
-import "./first-inner";
+import "./scss/first.scss";
+import "./first-inner.js";
 
 console.log(`${__filename.replace("\\", "/")} - запуск`);
-console.log(`${__filename.replace("\\", "/")} - запуск 321`);
 
 if (module && module.hot) {
   module.hot.accept();

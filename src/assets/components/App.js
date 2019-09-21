@@ -3,7 +3,7 @@ import useInterval from "../hooks/useInterval";
 
 console.log(`${__filename.replace("\\", "/")} - запуск`);
 
-export default function App() {
+function Counter() {
   const [i, setI] = useState(1);
 
   useInterval(() => {
@@ -12,6 +12,21 @@ export default function App() {
 
   return <div>react {i} ;)</div>;
 }
+
+function App() {
+  return (
+    <div>
+      <div>
+        <Counter />
+      </div>
+      <div>
+        <div className="image-webpack"></div>
+      </div>
+    </div>
+  );
+}
+
+export default App;
 
 if (module && module.hot) {
   module.hot.dispose(function() {

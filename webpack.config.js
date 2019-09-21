@@ -63,8 +63,8 @@ module.exports = function(env, argv) {
       // chunks: ["vendors", "entry-js-2"]
     }),
     new MiniCssExtractPlugin({
-      filename: "assets/[chunkhash].css",
-      chunkFilename: "assets/[chunkhash].css"
+      filename: "assets/css/[chunkhash].css",
+      chunkFilename: "assets/css/[chunkhash].css"
     }),
     new HashedModuleIdsPlugin()
   ];
@@ -103,10 +103,12 @@ module.exports = function(env, argv) {
     },
     output: {
       publicPath,
-      filename: isHot ? "assets/[name].js" : "assets/[chunkhash].js",
+      filename: isHot
+        ? "assets/js/[name].js"
+        : "assets/js/[name].[chunkhash].js",
       chunkFilename: isHot
-        ? "assets/deps/[name].js"
-        : "assets/deps/[chunkhash].js",
+        ? "assets/js/[name].js"
+        : "assets/js/[name].[chunkhash].js",
       path: path.resolve(__dirname, "dist")
     },
     module: {
@@ -155,8 +157,7 @@ module.exports = function(env, argv) {
           use: {
             loader: "file-loader",
             options: {
-              // name: '[path][name].[ext]',
-              // context: 'src', // prevent display of src/ in filename
+              name: "assets/img/[hash].[ext]"
             }
           }
         }
@@ -166,7 +167,10 @@ module.exports = function(env, argv) {
       hints: false
     },
     optimization: {
-      // runtimeChunk: true,
+      moduleIds: "hashed",
+      runtimeChunk: {
+        name: "runtime"
+      },
       splitChunks: {
         cacheGroups: {
           commons: {

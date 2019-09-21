@@ -1,0 +1,17 @@
+::placeholder {
+  color: gray;
+}
+
+:root {
+  .div-1 {
+    color: red;
+    border: 1px solid green;
+  }
+}
+
+.image-webpack {
+  background: transparent url("../images/webpack.png") 50% 50% / cover no-repeat;
+  display: inline-block;
+  height: 50px;
+  width: 50px;
+}

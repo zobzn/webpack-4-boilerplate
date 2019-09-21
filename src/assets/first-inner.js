@@ -2,7 +2,6 @@ import React from "react";
 import ReactDOM from "react-dom";
 import $ from "jquery";
 import App from "./components/App";
-import "./first.scss";
 
 console.log(`${__filename.replace("\\", "/")} - запуск 2`);
 

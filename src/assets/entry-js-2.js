@@ -1,6 +1,6 @@
 import logger1 from "./logger-1";
 import $ from "jquery";
-import "./second.scss";
+import "./scss/second.scss";
 
 console.log(`${__filename.replace("\\", "/")} - запуск`);
 
