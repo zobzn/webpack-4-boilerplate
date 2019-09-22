@@ -8,6 +8,7 @@ const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
 const FriendlyErrorsWebpackPlugin = require("friendly-errors-webpack-plugin");
 const WriteFilePlugin = require("write-file-webpack-plugin");
 const VueLoaderPlugin = require("vue-loader/lib/plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 // const devMode = process.env.NODE_ENV !== "production";
 
@@ -15,7 +16,15 @@ module.exports = function(options) {
   const entries = options.entries || {};
   const optionPublicPathHot = options.publicPathHot || "http://localhost:8080/";
   const optionPublicPath = options.publicPath || undefined;
+  const optionStaticPath = options.staticPath || "static";
+  const optionDistPath = options.distPath || "dist";
+  const optionSrcPath = options.srcPath || "src";
   const optionHtmlFiles = options.htmlFiles || [];
+  const resDirImages = options.resDirImages || "";
+  const resDirFonts = options.resDirFonts || "";
+  const resDirCss = options.resDirCss || "";
+  const resDirJs = options.resDirJs || "";
+
   const htmlFiles = optionHtmlFiles.map(opts => new HtmlWebpackPlugin(opts));
 
   return function(env, argv) {
@@ -53,12 +62,18 @@ module.exports = function(options) {
           };
         }
       }),
-      ...htmlFiles,
       new MiniCssExtractPlugin({
-        filename: "assets/css/[name].[chunkhash].css",
-        chunkFilename: "assets/css/[name].[chunkhash].css"
+        filename: `${resDirCss}/[name].[chunkhash].css`.replace(/^\/+/, ""),
+        chunkFilename: `${resDirCss}/[name].[chunkhash].css`.replace(/^\/+/, "")
       }),
-      new VueLoaderPlugin()
+      new VueLoaderPlugin(),
+      new CopyWebpackPlugin([
+        {
+          from: path.resolve(__dirname, optionStaticPath),
+          to: path.resolve(__dirname, optionDistPath)
+        }
+      ]),
+      ...htmlFiles
     ];
 
     if (isProd) {
@@ -72,7 +87,7 @@ module.exports = function(options) {
     }
 
     return {
-      context: path.resolve(__dirname, "src"),
+      context: path.resolve(__dirname, optionSrcPath),
       node: {
         __filename: true,
         __dirname: true
@@ -82,7 +97,7 @@ module.exports = function(options) {
         ignored: /node_modules/
       },
       devServer: {
-        contentBase: path.resolve(__dirname, "dist"),
+        contentBase: path.resolve(__dirname, optionDistPath),
         compress: true,
         // port: 9000,
         watchContentBase: true,
@@ -93,17 +108,17 @@ module.exports = function(options) {
       output: {
         publicPath,
         filename: isHot
-          ? "assets/js/[name].js"
-          : "assets/js/[name].[chunkhash].js",
+          ? `${resDirJs}/[name].js`.replace(/^\/+/, "")
+          : `${resDirJs}/[name].[chunkhash].js`.replace(/^\/+/, ""),
         chunkFilename: isHot
-          ? "assets/js/[name].js"
-          : "assets/js/[name].[chunkhash].js",
-        path: path.resolve(__dirname, "dist")
+          ? `${resDirJs}/[name].js`.replace(/^\/+/, "")
+          : `${resDirJs}/[name].[chunkhash].js`.replace(/^\/+/, ""),
+        path: path.resolve(__dirname, optionDistPath)
       },
       resolve: {
         extensions: [".js", ".jsx", ".vue", ".json"],
         alias: {
-          static: path.resolve(__dirname, "static")
+          static: path.resolve(__dirname, optionStaticPath)
         }
       },
       module: {
@@ -150,15 +165,35 @@ module.exports = function(options) {
                   },
               "css-loader",
               "postcss-loader",
-              "sass-loader"
+              {
+                loader: "resolve-url-loader",
+                options: {}
+              },
+              {
+                loader: "sass-loader",
+                options: {
+                  sourceMap: true
+                  // sourceMapContents: false
+                }
+              }
             ]
+          },
+          {
+            test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
+            use: {
+              loader: "file-loader",
+              options: {
+                name: "[name].[ext]",
+                outputPath: resDirFonts
+              }
+            }
           },
           {
             test: /\.(?:ico|gif|png|jpg|jpeg|webp|svg)$/i,
             use: {
               loader: "file-loader",
               options: {
-                name: "assets/img/[hash].[ext]"
+                name: `${resDirImages}/[hash].[ext]`.replace(/^\/+/, "")
               }
             }
           }

@@ -1,17 +1,48 @@
+$fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
+
+@import "~@fortawesome/fontawesome-free/scss/fontawesome.scss";
+@import "~@fortawesome/fontawesome-free/scss/brands.scss";
+@import "~@fortawesome/fontawesome-free/scss/regular.scss";
+@import "~@fortawesome/fontawesome-free/scss/solid.scss";
+
+// https://github.com/Athari/CssGitHubWindows/blob/master/GitHubWindows.user.css
+
+$color-button-text: rgb(0, 0, 0);
+$color-button-face: rgb(192, 192, 192);
+$color-button-highlight: rgb(255, 255, 255);
+$color-button-shadow: rgb(128, 128, 128);
+$color-button-shadow-dark: rgb(0, 0, 0);
+$color-button-checked: rgb(223, 223, 223);
+$color-window-text: rgb(0, 0, 0);
+$color-window: rgb(255, 255, 255);
+$color-active-caption-text: rgb(255, 255, 255);
+$color-active-caption: rgb(0, 0, 128);
+$color-info-background: rgb(255, 255, 192);
+$color-highlight-text: rgb(255, 255, 255);
+$color-highlight: rgb(0, 0, 128);
+$color-gray-text: rgb(128, 128, 128);
+$color-link: rgb(0, 0, 255);
+$color-hover: rgb(223, 223, 255);
+
+body {
+  background: $color-button-face;
+  font: 12px/1.2 MS Sans Serif, MS Reference Sans Serif, sans-serif;
+}
+
+::selection {
+  color: $color-highlight-text;
+  background: $color-highlight;
+}
+
 ::placeholder {
-  color: gray;
+  color: $color-gray-text;
+  opacity: 1;
 }
 
-:root {
-  .div-1 {
-    color: red;
-    border: 1px solid green;
-  }
+.bordered-section {
+  border: 2px groove ThreeDFace;
+  margin: 1rem 0;
+  padding: 1rem;
 }
 
-.image-webpack {
-  background: transparent url("../images/webpack.png") 50% 50% / cover no-repeat;
-  display: inline-block;
-  height: 50px;
-  width: 50px;
-}
+@import "./partials/inner";

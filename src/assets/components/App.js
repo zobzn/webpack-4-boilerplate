@@ -16,12 +16,23 @@ function Counter() {
 function App() {
   return (
     <div>
-      <div>
+      <section className="bordered-section">
+        <h3>React</h3>
         <Counter />
-      </div>
-      <div>
+      </section>
+      <section className="bordered-section">
+        <h3>Images in sass</h3>
         <div className="image-webpack"></div>
-      </div>
+      </section>
+      <section className="bordered-section">
+        <h3>FontAwesome</h3>
+        <div>
+          <i className="fab fa-php fa-2x"></i>{" "}
+          <i className="fab fa-node-js fa-2x"></i>
+          <i className="fas fa-star fa-2x"></i>
+          <i className="far fa-star fa-2x"></i>
+        </div>
+      </section>
     </div>
   );
 }

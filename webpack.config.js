@@ -14,11 +14,13 @@ const entries = glob
     return { ...entries, [key]: val };
   }, {});
 
-// console.log(entries);
-
 module.exports = builder({
   publicPathHot: "http://localhost:8080/",
   publicPath: "", // '/' or './' or '//cdn.example.org/' or whatever
+  // resDirImages: "assets/img",
+  // resDirFonts: "assets/fonts",
+  // resDirCss: "assets/css",
+  // resDirJs: "assets/js",
   entries,
   htmlFiles: [
     {
