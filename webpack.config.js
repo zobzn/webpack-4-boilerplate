@@ -2,17 +2,28 @@ const glob = require("glob");
 const path = require("path");
 const builder = require("./webpack.config.builder");
 
-const entries = glob
-  .sync("./src/assets/entry-*.js")
-  .reduce(function(entries, file) {
-    const key = file
-      .split("/")
-      .pop()
-      .replace(/\.js$/i, "");
-    val = file.replace(/^\.\/src\//, "./");
+const entries = glob.sync("./src/index.js").reduce(function(entries, filepath) {
+  const chunk = filepath.replace(/^\.\/src\//, "./");
+  const entryName = filepath
+    .split("/")
+    .pop()
+    .replace(/\.js$/i, "");
 
-    return { ...entries, [key]: val };
-  }, {});
+  return { ...entries, [entryName]: chunk };
+}, {});
+
+const htmls = glob.sync("./src/*.{htm,html}").reduce(function(htmls, filepath) {
+  const filename = filepath.split("/").pop();
+
+  return [
+    ...htmls,
+    {
+      template: path.resolve(__dirname, filepath),
+      xhtml: true,
+      filename
+    }
+  ];
+}, []);
 
 module.exports = builder({
   publicPathHot: "http://localhost:8080/",
@@ -21,23 +32,6 @@ module.exports = builder({
   // resDirFonts: "assets/fonts",
   // resDirCss: "assets/css",
   // resDirJs: "assets/js",
-  entries,
-  htmlFiles: [
-    {
-      // inject: "body"
-      xhtml: true,
-      title: "Документ 1",
-      template: path.resolve(__dirname, "src/index-1.htm"),
-      filename: "index-1.htm"
-      // chunks: ["vendors", "entry-js-1"]
-    },
-    {
-      // inject: "body"
-      xhtml: true,
-      title: "Документ 2",
-      template: path.resolve(__dirname, "src/index-2.htm"),
-      filename: "index-2.htm"
-      // chunks: ["vendors", "entry-js-2"]
-    }
-  ]
+  htmlFiles: htmls,
+  entries
 });

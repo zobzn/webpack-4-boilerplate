@@ -1,7 +1,5 @@
 import { useEffect, useRef } from "react";
 
-console.log(`${__filename.replace("\\", "/")} - запуск`);
-
 const noop = () => {};
 
 export default function useInterval(callback, delay = null, immediate = false) {
@@ -23,10 +21,4 @@ export default function useInterval(callback, delay = null, immediate = false) {
     const id = setInterval(tick, delay);
     return () => clearInterval(id);
   }, [delay]);
-}
-
-if (module && module.hot) {
-  module.hot.dispose(function() {
-    console.log(`${__filename.replace("\\", "/")} - модуль будет заменен`);
-  });
 }

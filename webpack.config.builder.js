@@ -118,7 +118,8 @@ module.exports = function(options) {
       resolve: {
         extensions: [".js", ".jsx", ".vue", ".json"],
         alias: {
-          static: path.resolve(__dirname, optionStaticPath)
+          static: path.resolve(__dirname, optionStaticPath),
+          vue$: "vue/dist/vue.esm.js"
         }
       },
       module: {
@@ -165,10 +166,7 @@ module.exports = function(options) {
                   },
               "css-loader",
               "postcss-loader",
-              {
-                loader: "resolve-url-loader",
-                options: {}
-              },
+              "resolve-url-loader",
               {
                 loader: "sass-loader",
                 options: {
@@ -179,7 +177,7 @@ module.exports = function(options) {
             ]
           },
           {
-            test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
+            test: /\.(woff(2)?|ttf|eot)(\?v=\d+\.\d+\.\d+)?$/,
             use: {
               loader: "file-loader",
               options: {
@@ -208,20 +206,7 @@ module.exports = function(options) {
           name: "runtime"
         },
         splitChunks: {
-          cacheGroups: {
-            commons: {
-              test: /[\\/]node_modules[\\/]/,
-              // name: "vendors",
-              chunks: "all",
-              name: false
-            }
-            // vendor: {
-            //   test: /node_modules/,
-            //   name: "vendors",
-            //   chunks: "initial",
-            //   enforce: true
-            // }
-          }
+          chunks: "all"
         }
       },
       plugins

@@ -1,7 +1,8 @@
-import "./scss/first.scss";
-import "./first-inner.js";
+import "./index.scss";
 
-console.log(`${__filename.replace("\\", "/")} - запуск`);
+(async () => {
+  await import("./inner.js");
+})();
 
 if (module && module.hot) {
   module.hot.accept();
