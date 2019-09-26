@@ -28,10 +28,10 @@ const htmls = glob.sync("./src/*.{htm,html}").reduce(function(htmls, filepath) {
 module.exports = builder({
   publicPathHot: "http://localhost:8080/",
   publicPath: "", // '/' or './' or '//cdn.example.org/' or whatever
-  // resDirImages: "assets/img",
-  // resDirFonts: "assets/fonts",
-  // resDirCss: "assets/css",
-  // resDirJs: "assets/js",
+  resDirImages: "assets/img",
+  resDirFonts: "assets/fonts",
+  resDirCss: "assets/css",
+  resDirJs: "assets/js",
   htmlFiles: htmls,
   entries
 });

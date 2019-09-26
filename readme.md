@@ -22,7 +22,6 @@ It will support:
 
 ### other
 
-- [x] vendors chunk
 - [x] hashed chunk names
 - [ ] html templates (html-webpack-plugin)
 - [x] async/await
@@ -32,6 +31,7 @@ It will support:
 - [x] sass
 - [x] sass hmr
 - [x] fonts in sass (tested on fontawesome-free)
-- [ ] relative image urls in sass (resolve-url-loader)
-- [ ] absolute image urls in sass (postcss-url)
+- [x] relative image urls in sass (resolve-url-loader)
+- [x] absolute image urls in sass (postcss-url)
 - [x] postcss
+- [ ] split chunks

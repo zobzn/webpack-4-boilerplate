@@ -1,6 +1,5 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const ManifestPlugin = require("webpack-manifest-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const WebpackAssetsManifest = require("webpack-assets-manifest");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
@@ -11,6 +10,8 @@ const VueLoaderPlugin = require("vue-loader/lib/plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 // const devMode = process.env.NODE_ENV !== "production";
+
+const rel = string => string.replace(/^\/+/, "");
 
 module.exports = function(options) {
   const entries = options.entries || {};
@@ -38,56 +39,19 @@ module.exports = function(options) {
       ? optionPublicPathHot || optionPublicPath
       : optionPublicPath;
 
+    const suffix = isHot ? "" : "?ver=[chunkhash]";
+
     console.log("mode", mode);
     console.log("watch", isWatch);
     console.log("hot", isHot);
 
-    const plugins = [
-      new FriendlyErrorsWebpackPlugin(),
-      new CleanWebpackPlugin(),
-      new WriteFilePlugin(),
-      new ManifestPlugin({
-        fileName: "manifest.json"
-      }),
-      new WebpackAssetsManifest({
-        entrypoints: true,
-        output: "assets-manifest.json",
-        publicPath: true, // "/", "//cdn.example.org/"
-        transform: (assets, manifest) => {
-          const { name, version } = require("./package.json");
-
-          return {
-            package: { name, version },
-            entries: assets.entrypoints
-          };
-        }
-      }),
-      new MiniCssExtractPlugin({
-        filename: `${resDirCss}/[name].[chunkhash].css`.replace(/^\/+/, ""),
-        chunkFilename: `${resDirCss}/[name].[chunkhash].css`.replace(/^\/+/, "")
-      }),
-      new VueLoaderPlugin(),
-      new CopyWebpackPlugin([
-        {
-          from: path.resolve(__dirname, optionStaticPath),
-          to: path.resolve(__dirname, optionDistPath)
-        }
-      ]),
-      ...htmlFiles
-    ];
-
-    if (isProd) {
-      plugins.push(
-        new BundleAnalyzerPlugin({
-          reportFilename: "bundle.html",
-          analyzerMode: "static",
-          openAnalyzer: false
-        })
-      );
-    }
-
     return {
       context: path.resolve(__dirname, optionSrcPath),
+      stats: {
+        children: false,
+        entrypoints: false,
+        excludeAssets: /\.(gif|png|jpg|jpeg|svg)/
+      },
       node: {
         __filename: true,
         __dirname: true
@@ -97,22 +61,25 @@ module.exports = function(options) {
         ignored: /node_modules/
       },
       devServer: {
+        disableHostCheck: true,
         contentBase: path.resolve(__dirname, optionDistPath),
         compress: true,
         // port: 9000,
         watchContentBase: true,
-        progress: false
-        // hot: true
+        progress: false,
+        headers: {
+          "Access-Control-Allow-Methods":
+            "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+          "Access-Control-Allow-Headers":
+            "X-Requested-With, content-type, Authorization",
+          "Access-Control-Allow-Origin": "*"
+        }
       },
       entry: entries,
       output: {
         publicPath,
-        filename: isHot
-          ? `${resDirJs}/[name].js`.replace(/^\/+/, "")
-          : `${resDirJs}/[name].[chunkhash].js`.replace(/^\/+/, ""),
-        chunkFilename: isHot
-          ? `${resDirJs}/[name].js`.replace(/^\/+/, "")
-          : `${resDirJs}/[name].[chunkhash].js`.replace(/^\/+/, ""),
+        filename: rel(`${resDirJs}/[name].js` + suffix),
+        chunkFilename: rel(`${resDirJs}/[name].js` + suffix),
         path: path.resolve(__dirname, optionDistPath)
       },
       resolve: {
@@ -153,17 +120,18 @@ module.exports = function(options) {
           {
             test: /\.(sa|sc|c)ss$/,
             use: [
-              false
-                ? "style-loader"
-                : {
-                    loader: MiniCssExtractPlugin.loader,
-                    options: {
-                      // only enable hot in development
-                      hmr: isHot,
-                      // if hmr does not work, this is a forceful method.
-                      reloadAll: true
-                    }
-                  },
+              {
+                loader: MiniCssExtractPlugin.loader,
+                options: {
+                  hmr: isHot,
+                  reloadAll: true,
+                  publicPath: resDirCss
+                    .trim("/")
+                    .split("/")
+                    .map(_ => "..")
+                    .join("/")
+                }
+              },
               "css-loader",
               "postcss-loader",
               "resolve-url-loader",
@@ -171,18 +139,18 @@ module.exports = function(options) {
                 loader: "sass-loader",
                 options: {
                   sourceMap: true
-                  // sourceMapContents: false
                 }
               }
             ]
           },
           {
-            test: /\.(woff(2)?|ttf|eot)(\?v=\d+\.\d+\.\d+)?$/,
+            test: /\.(?:ttf|eot|woff2?)(?:\?v=\d+\.\d+\.\d+)?$/,
             use: {
               loader: "file-loader",
               options: {
-                name: "[name].[ext]",
-                outputPath: resDirFonts
+                name: "[name].[hash].[ext]",
+                outputPath: resDirFonts,
+                useRelativePath: true
               }
             }
           },
@@ -191,7 +159,9 @@ module.exports = function(options) {
             use: {
               loader: "file-loader",
               options: {
-                name: `${resDirImages}/[hash].[ext]`.replace(/^\/+/, "")
+                name: `[name].[hash].[ext]`,
+                outputPath: resDirImages,
+                useRelativePath: true
               }
             }
           }
@@ -209,7 +179,39 @@ module.exports = function(options) {
           chunks: "all"
         }
       },
-      plugins
+      plugins: [
+        new FriendlyErrorsWebpackPlugin(),
+        !isProd ? null : new CleanWebpackPlugin(),
+        new WriteFilePlugin(),
+        new WebpackAssetsManifest({
+          output: "assets.json",
+          entrypointsKey: "entrypoints",
+          entrypoints: true,
+          publicPath: true,
+          transform: (assets, manifest) => ({
+            entries: assets.entrypoints
+          })
+        }),
+        new MiniCssExtractPlugin({
+          filename: rel(`${resDirCss}/[name].css` + suffix),
+          chunkFilename: rel(`${resDirCss}/[name].css` + suffix)
+        }),
+        new VueLoaderPlugin(),
+        new CopyWebpackPlugin([
+          {
+            from: path.resolve(__dirname, optionStaticPath),
+            to: path.resolve(__dirname, optionDistPath)
+          }
+        ]),
+        ...htmlFiles,
+        !isProd
+          ? null
+          : new BundleAnalyzerPlugin({
+              reportFilename: "bundle.htm",
+              analyzerMode: "static",
+              openAnalyzer: false
+            })
+      ].filter(plugin => !!plugin)
     };
   };
 };
