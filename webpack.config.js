@@ -2,7 +2,7 @@ const glob = require("glob");
 const path = require("path");
 const builder = require("./webpack.config.builder");
 
-const entries = glob.sync("./src/index.js").reduce(function(entries, filepath) {
+const entries = glob.sync("./src/index.js").reduce((entries, filepath) => {
   const chunk = filepath.replace(/^\.\/src\//, "./");
   const entryName = filepath
     .split("/")
@@ -12,18 +12,17 @@ const entries = glob.sync("./src/index.js").reduce(function(entries, filepath) {
   return { ...entries, [entryName]: chunk };
 }, {});
 
-const htmls = glob.sync("./src/*.{htm,html}").reduce(function(htmls, filepath) {
-  const filename = filepath.split("/").pop();
-
-  return [
+const htmls = glob.sync("./src/*.{htm,html}").reduce(
+  (htmls, filepath) => [
     ...htmls,
     {
       template: path.resolve(__dirname, filepath),
-      xhtml: true,
-      filename
+      filename: filepath.split("/").pop(),
+      xhtml: true
     }
-  ];
-}, []);
+  ],
+  []
+);
 
 module.exports = builder({
   publicPathHot: "http://localhost:8080/",

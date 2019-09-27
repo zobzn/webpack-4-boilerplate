@@ -171,11 +171,17 @@ module.exports = function(options) {
         hints: false
       },
       optimization: {
+        namedModules: true,
+        namedChunks: true,
         moduleIds: "hashed",
+        chunkIds: "named",
         runtimeChunk: {
           name: "runtime"
         },
         splitChunks: {
+          maxInitialRequests: Infinity,
+          automaticNameMaxLength: 16,
+          minSize: 30000,
           chunks: "all"
         }
       },
