@@ -1,37 +1,26 @@
 # Webpack 4 boilerplate
 
-> Work still in progress
-
-It will support:
+Supports:
 
 - webpack 4 with hot module replacement
+- babel (async/await/import etc.)
 - polyfills (core-js)
+- css modules
 - postcss
 - sass
-- babel (async/await/import etc.)
 - react
 - vue
 
-## todo
+### Scripts
 
-### scripts
+- build - production
+- watch - development with watch
+- start - development with watch and hmr
 
-- [x] build - production
-- [x] watch - development
-- [x] start - development with hmr
+### Features
 
-### other
-
-- [x] hashed chunk names
-- [ ] html templates (html-webpack-plugin)
-- [x] async/await
-- [x] import().then
-- [x] react
-- [x] vue
-- [x] sass
-- [x] sass hmr
-- [x] fonts in sass (tested on fontawesome-free)
-- [x] relative image urls in sass (resolve-url-loader)
-- [x] absolute image urls in sass (postcss-url)
-- [x] postcss
-- [ ] split chunks
+- split chunks with hashed chunk names
+- html templates (using html-webpack-plugin)
+- fonts in sass (tested on fontawesome-free)
+- relative image urls in sass (using resolve-url-loader)
+- absolute image urls in sass (using postcss-url)

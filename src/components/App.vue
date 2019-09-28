@@ -1,21 +1,22 @@
 <template>
   <div>
-    <div>Vue works</div>
-    <div>{{ i }} ;)</div>
+    <div :class="$style.header">Vue works</div>
+    <div :class="styles.counter">{{ i }}</div>
   </div>
 </template>
 
 <script>
+import styles from "./App.module.scss";
+
 export default {
   data() {
     return {
       interval: null,
+      styles,
       i: 0
     };
   },
   mounted() {
-    this.i = 0;
-
     this.interval = setInterval(this.increment, 100);
   },
   beforeDestroy() {
@@ -28,3 +29,25 @@ export default {
   }
 };
 </script>
+
+<!--
+this will be available as this.$style
+-->
+<style lang="scss" module>
+$color: inherit;
+
+.header {
+  color: $color;
+}
+</style>
+
+<!--
+this will be available as this.styles
+<style lang="scss" module="styles">
+$green: green;
+
+.header {
+  color: $green;
+}
+</style>
+-->

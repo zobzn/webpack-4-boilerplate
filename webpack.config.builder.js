@@ -56,16 +56,16 @@ module.exports = function(options) {
         __filename: true,
         __dirname: true
       },
-      watch: isWatch,
+      watch: isWatch && !isHot,
       watchOptions: {
         ignored: /node_modules/
       },
       devServer: {
-        disableHostCheck: true,
         contentBase: path.resolve(__dirname, optionDistPath),
+        watchContentBase: !isHot && !isProd,
+        disableHostCheck: true,
         compress: true,
         // port: 9000,
-        watchContentBase: true,
         progress: false,
         headers: {
           "Access-Control-Allow-Methods":
@@ -107,18 +107,14 @@ module.exports = function(options) {
           {
             test: /\.m?jsx?$/,
             exclude: /(node_modules|bower_components)/,
-            use: {
-              loader: "babel-loader"
-            }
+            loader: "babel-loader"
           },
           {
             test: /\.vue$/,
-            use: {
-              loader: "vue-loader"
-            }
+            loader: "vue-loader"
           },
           {
-            test: /\.(sa|sc|c)ss$/,
+            test: /\.module\.(sa|sc|c)ss$/,
             use: [
               {
                 loader: MiniCssExtractPlugin.loader,
@@ -132,7 +128,16 @@ module.exports = function(options) {
                     .join("/")
                 }
               },
-              "css-loader",
+              {
+                loader: "css-loader",
+                options: {
+                  modules: true
+                  // importLoaders: true
+                  // modules: {
+                  //   localIdentName: "[local]_[hash:base64:8]"
+                  // }
+                }
+              },
               "postcss-loader",
               "resolve-url-loader",
               {
@@ -140,6 +145,72 @@ module.exports = function(options) {
                 options: {
                   sourceMap: true
                 }
+              }
+            ]
+          },
+          {
+            test: /\.(sa|sc|c)ss$/,
+            exclude: /\.module.(sa|sc|c)ss$/,
+            oneOf: [
+              {
+                resourceQuery: /module/,
+                use: [
+                  {
+                    loader: MiniCssExtractPlugin.loader,
+                    options: {
+                      hmr: isHot,
+                      reloadAll: true,
+                      publicPath: resDirCss
+                        .trim("/")
+                        .split("/")
+                        .map(_ => "..")
+                        .join("/")
+                    }
+                  },
+                  {
+                    loader: "css-loader",
+                    options: {
+                      modules: true
+                      // importLoaders: true
+                      // modules: {
+                      //   localIdentName: "[local]_[hash:base64:8]"
+                      // }
+                    }
+                  },
+                  "postcss-loader",
+                  "resolve-url-loader",
+                  {
+                    loader: "sass-loader",
+                    options: {
+                      sourceMap: true
+                    }
+                  }
+                ]
+              },
+              {
+                use: [
+                  {
+                    loader: MiniCssExtractPlugin.loader,
+                    options: {
+                      hmr: isHot,
+                      reloadAll: true,
+                      publicPath: resDirCss
+                        .trim("/")
+                        .split("/")
+                        .map(_ => "..")
+                        .join("/")
+                    }
+                  },
+                  "css-loader",
+                  "postcss-loader",
+                  "resolve-url-loader",
+                  {
+                    loader: "sass-loader",
+                    options: {
+                      sourceMap: true
+                    }
+                  }
+                ]
               }
             ]
           },

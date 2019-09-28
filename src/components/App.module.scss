@@ -1,0 +1,13 @@
+$green: green;
+
+.header {
+  color: inherit;
+}
+
+.counter {
+  color: $green;
+}
+
+.counter:after {
+  content: " (color came from css module)";
+}

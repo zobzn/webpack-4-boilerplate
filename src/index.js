@@ -16,6 +16,8 @@ qsa(".root-react").forEach(async root => {
 
 qsa(".root-vue").forEach(async root => {
   const Vue = (await import("vue")).default;
+  Vue.config.productionTip = false;
+
   const VueApp = (await import("./components/App.vue")).default;
 
   new Vue({
