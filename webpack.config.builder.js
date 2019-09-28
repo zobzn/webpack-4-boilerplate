@@ -41,6 +41,16 @@ module.exports = function(options) {
 
     const suffix = isHot ? "" : "?ver=[chunkhash]";
 
+    const MiniCssExtractPluginLoaderOptions = {
+      hmr: isHot,
+      reloadAll: true,
+      publicPath: resDirCss
+        .trim("/")
+        .split("/")
+        .map(_ => "..")
+        .join("/")
+    };
+
     console.log("mode", mode);
     console.log("watch", isWatch);
     console.log("hot", isHot);
@@ -53,8 +63,8 @@ module.exports = function(options) {
         excludeAssets: /\.(gif|png|jpg|jpeg|svg)/
       },
       node: {
-        __filename: true,
-        __dirname: true
+        __filename: true, // fix __filename variable in js
+        __dirname: true // fix __dirname variable in js
       },
       watch: isWatch && !isHot,
       watchOptions: {
@@ -64,9 +74,8 @@ module.exports = function(options) {
         contentBase: path.resolve(__dirname, optionDistPath),
         watchContentBase: !isHot && !isProd,
         disableHostCheck: true,
-        compress: true,
-        // port: 9000,
         progress: false,
+        compress: true,
         headers: {
           "Access-Control-Allow-Methods":
             "GET, POST, PUT, DELETE, PATCH, OPTIONS",
@@ -78,9 +87,9 @@ module.exports = function(options) {
       entry: entries,
       output: {
         publicPath,
+        path: path.resolve(__dirname, optionDistPath),
         filename: rel(`${resDirJs}/[name].js` + suffix),
-        chunkFilename: rel(`${resDirJs}/[name].js` + suffix),
-        path: path.resolve(__dirname, optionDistPath)
+        chunkFilename: rel(`${resDirJs}/[name].js` + suffix)
       },
       resolve: {
         extensions: [".js", ".jsx", ".vue", ".json"],
@@ -118,24 +127,13 @@ module.exports = function(options) {
             use: [
               {
                 loader: MiniCssExtractPlugin.loader,
-                options: {
-                  hmr: isHot,
-                  reloadAll: true,
-                  publicPath: resDirCss
-                    .trim("/")
-                    .split("/")
-                    .map(_ => "..")
-                    .join("/")
-                }
+                options: MiniCssExtractPluginLoaderOptions
               },
               {
                 loader: "css-loader",
                 options: {
-                  modules: true
-                  // importLoaders: true
-                  // modules: {
-                  //   localIdentName: "[local]_[hash:base64:8]"
-                  // }
+                  modules: true,
+                  importLoaders: 3
                 }
               },
               "postcss-loader",
@@ -157,24 +155,13 @@ module.exports = function(options) {
                 use: [
                   {
                     loader: MiniCssExtractPlugin.loader,
-                    options: {
-                      hmr: isHot,
-                      reloadAll: true,
-                      publicPath: resDirCss
-                        .trim("/")
-                        .split("/")
-                        .map(_ => "..")
-                        .join("/")
-                    }
+                    options: MiniCssExtractPluginLoaderOptions
                   },
                   {
                     loader: "css-loader",
                     options: {
-                      modules: true
-                      // importLoaders: true
-                      // modules: {
-                      //   localIdentName: "[local]_[hash:base64:8]"
-                      // }
+                      modules: true,
+                      importLoaders: 3
                     }
                   },
                   "postcss-loader",
