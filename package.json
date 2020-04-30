@@ -18,7 +18,7 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.11.1",
     "core-js": "^3.2.1",
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.0",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
     "regenerator-runtime": "^0.13.3",
